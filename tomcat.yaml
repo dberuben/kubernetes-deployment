@@ -1,0 +1,40 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: tomcatservice
+spec:
+  selector:
+    app: tomcat
+  ports:
+    - protocol: "TCP"          
+    # Port accessible inside cluster
+      port: 8082                            
+      # Port to forward to inside the pod
+      targetPort: 8080         
+      # Port accessible outside cluster
+      nodePort: 30003
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1           
+# for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: tomcat-deployment
+spec:
+  selector:
+    matchLabels:
+      app: tomcat
+  replicas: 2           
+  # tells deployment to run 2 pods matching the template
+  template:             
+  # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      containers:
+      - name: tomcat
+        image: tomcat:8.5.31
+        ports:
+        - containerPort: 8080

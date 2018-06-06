@@ -1,0 +1,43 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginxservice
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: "TCP"          
+    # Port accessible inside cluster
+      port: 8080                            
+      # Port to forward to inside the pod
+      targetPort: 80         
+      # Port accessible outside cluster
+      nodePort: 30001
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1           
+# Which version of the Kubernetes API you’re using to create this object
+# for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+#What kind of object you want to create
+metadata:
+#Data that helps uniquely identify the object, including a name string, UID, and optional namespace
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2           
+  # tells deployment to run 2 pods matching the template
+  template:             
+  # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
